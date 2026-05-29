@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: #adb5bd;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .login-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .modal-header h2 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .modal-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .modal-button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .modal-button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .modal-button.secondary {
+            background: #f1f3f4;
+            color: #555;
+        }
+        
+        .modal-button.secondary:hover {
+            background: #e8ebed;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .success-message {
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        @media (max-width: 480px) {
+            .login-container, .modal-content {
+                padding: 30px 24px;
+            }
+            
+            .login-header h1, .modal-header h2 {
+                font-size: 24px;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>用户登录</h1>
+            <p>请输入您的凭据以继续</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请输入密码" required>
+            </div>
+            
+            <button type="submit" class="login-button">登录</button>
+            
+            <div id="errorMessage" class="error-message">
+                用户名或密码错误
+            </div>
+            
+            <div id="successMessage" class="success-message">
+                注册成功，请登录
+            </div>
+        </form>
+        
+        <div class="register-link">
+            <p>还没有账号？<a href="#" id="showRegister">立即注册</a></p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 用户登录系统</p>
+        </div>
+    </div>
+
+    <!-- 询问是否为新用户的模态框 -->
+    <div id="newUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>登录失败</h2>
+                <p>用户名或密码不正确，是否为新用户？</p>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-button primary" id="yesNewUser">是，我是新用户</button>
+                <button class="modal-button secondary" id="noNewUser">否，重试登录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册表单模态框 -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>用户注册</h2>
+                <p>请创建您的账号</p>
+            </div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regUsername">用户名</label>
+                    <input type="text" id="regUsername" placeholder="请输入用户名" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regPassword">密码</label>
+                    <input type="password" id="regPassword" placeholder="请输入密码" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regConfirmPassword">确认密码</label>
+                    <input type="password" id="regConfirmPassword" placeholder="请再次输入密码" required>
+                </div>
+                
+                <div id="registerError" class="error-message">
+                    密码不匹配或用户名已存在
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="submit" class="modal-button primary">注册</button>
+                    <button type="button" class="modal-button secondary" id="cancelRegister">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 从localStorage获取用户数据
+        function getUsers() {
+            const users = localStorage.getItem('registeredUsers');
+            return users ? JSON.parse(users) : {};
+        }
+        
+        // 保存用户数据到localStorage
+        function saveUsers(users) {
+            localStorage.setItem('registeredUsers', JSON.stringify(users));
+        }
+        
+        // 检查凭据是否正确
+        function validateCredentials(username, password) {
+            // 首先检查默认凭据
+            if (username === '17457' && password === '123') {
+                return true;
+            }
+            
+            // 然后检查注册用户
+            const users = getUsers();
+            return users[username] && users[username] === password;
+        }
+        
+        // 表单提交事件
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const loginButton = document.querySelector('.login-button');
+            
+            // 隐藏之前的消息
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // 显示加载状态
+            loginButton.disabled = true;
+            loginButton.textContent = '登录中...';
+            
+            // 模拟网络延迟
+            setTimeout(function() {
+                // 验证凭据
+                if (validateCredentials(username, password)) {
+                    // 跳转到欢迎页面
+                    window.location.href = 'welcome.html';
+                } else {
+                    // 显示询问是否为新用户的模态框
+                    document.getElementById('newUserModal').style.display = 'block';
+                    loginButton.disabled = false;
+                    loginButton.textContent = '登录';
+                }
+            }, 800);
+        });
+        
+        // 显示注册模态框
+        document.getElementById('showRegister').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('registerModal').style.display = 'block';
+        });
+        
+        // 是新用户按钮
+        document.getElementById('yesNewUser').addEventListener('click', function() {
+            document.getElementById('newUserModal').style.display = 'none';
+            document.getElementById('registerModal').style.display = 'block';
+        });
+        
+        // 不是新用户按钮
+        document.getElementById('noNewUser').addEventListener('click', function() {
+            document.getElementById('newUserModal').style.display = 'none';
+        });
+        
+        // 取消注册按钮
+        document.getElementById('cancelRegister').addEventListener('click', function() {
+            document.getElementById('registerModal').style.display = 'none';
+        });
+        
+        // 注册表单提交
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const registerError = document.getElementById('registerError');
+            
+            // 隐藏错误消息
+            registerError.style.display = 'none';
+            
+            // 验证密码是否匹配
+            if (password !== confirmPassword) {
+                registerError.textContent = '两次输入的密码不匹配';
+                registerError.style.display = 'block';
+                return;
+            }
+            
+            // 检查用户名是否已存在
+            const users = getUsers();
+            if (users[username]) {
+                registerError.textContent = '用户名已存在';
+                registerError.style.display = 'block';
+                return;
+            }
+            
+            // 保存新用户
+            users[username] = password;
+            saveUsers(users);
+            
+            // 关闭注册模态框，显示成功消息
+            document.getElementById('registerModal').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // 清空表单
+            document.getElementById('registerForm').reset();
+            
+            // 清空登录表单
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = '';
+        });
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+        
+        // 添加抖动动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 输入时隐藏错误消息
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                document.getElementById('errorMessage').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
